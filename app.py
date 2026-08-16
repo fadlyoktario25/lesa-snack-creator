@@ -128,6 +128,7 @@ if uploaded_files:
                     Hasilkan 3 komponen konten utama:
 
                     1. **Panduan Potongan Video (CapCut Guide)**:
+                       - WAJIB sebutkan file video mana yang diambil (contoh: Video 1, Video 2, atau nama file aslinya).
                        - Susun potongan klip menjadi total durasi 10 - 15 detik (rata-rata 2-3 detik per adegan).
                        - Klip 1: Hook visual (adegan mematahkan sumpia / visual renyah paling menarik).
                        - Klip 2 & 3: Isi (detail isian udang, tekstur, atau tangan mengambil camilan).
@@ -149,10 +150,10 @@ if uploaded_files:
                     Format Output:
                     ---
                     ### ✂️ 1. Panduan Potongan Video (CapCut)
-                    * Klip 1 (Hook): [00:0X - 00:0Y] -> ...
-                    * Klip 2 (Isi): [00:0X - 00:0Y] -> ...
-                    * Klip 3 (Isi): [00:0X - 00:0Y] -> ...
-                    * Klip 4 (CTA): [00:0X - 00:0Y] -> ...
+                    * Klip 1 (Hook) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
+                    * Klip 2 (Isi) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
+                    * Klip 3 (Isi) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
+                    * Klip 4 (CTA) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
                     *(Total Durasi: XX detik)*
 
                     ---
