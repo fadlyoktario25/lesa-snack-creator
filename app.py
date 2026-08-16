@@ -2,6 +2,7 @@ import streamlit as st
 from google import genai
 import tempfile
 import os
+import time
 
 # Konfigurasi Tampilan Halaman
 st.set_page_config(
@@ -30,7 +31,7 @@ st.markdown("""
         padding: 20px 0 10px 0;
     }
     .main-title {
-        font-size: 36px;
+        font-size: 34px;
         font-weight: 800;
         color: #0F172A !important;
         letter-spacing: -0.5px;
@@ -45,12 +46,12 @@ st.markdown("""
         background-color: #FFFFFF !important;
         border: 1px solid #E2E8F0;
         border-radius: 12px;
-        padding: 20px;
+        padding: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         height: 100%;
     }
-    .icon-box { font-size: 26px; margin-bottom: 8px; }
-    .card-title { font-size: 17px; font-weight: 700; color: #0F172A !important; margin-bottom: 4px; }
+    .icon-box { font-size: 24px; margin-bottom: 6px; }
+    .card-title { font-size: 16px; font-weight: 700; color: #0F172A !important; margin-bottom: 4px; }
     .card-desc { font-size: 13px; color: #64748B !important; line-height: 1.4; }
     </style>
 """, unsafe_allow_html=True)
@@ -69,8 +70,8 @@ with col1:
     st.markdown("""
         <div class="feature-card">
             <div class="icon-box">✂️</div>
-            <div class="card-title">CapCut Cut Guide</div>
-            <div class="card-desc">Deteksi otomatis timestamp dari setiap video yang diunggah untuk dipotong di CapCut.</div>
+            <div class="card-title">CapCut Visual Guide</div>
+            <div class="card-desc">Panduan potongan video dengan ciri visual thumbnail agar mudah dicari di galeri iPhone.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -107,14 +108,27 @@ if uploaded_files:
     if len(uploaded_files) > 5:
         st.error("⚠️ Maksimal 5 video saja ya!")
     else:
+        # Menampilkan Preview Video yang diupload
+        st.markdown("#### 🎬 Preview Video Terpilih:")
+        cols = st.columns(len(uploaded_files))
+        for i, file in enumerate(uploaded_files):
+            with cols[i]:
+                st.caption(f"**Video {i+1}** ({file.name})")
+                st.video(file)
+
+        st.write("")
         if st.button("🚀 Process & Generate Content", use_container_width=True, type="primary"):
             with st.spinner("Sedang menganalisa visual video, membuat skrip, dan meracik caption..."):
                 gemini_files = []
-                file_names = []
+                file_info_list = []
                 try:
-                    for file in uploaded_files:
-                        file_names.append(file.name)
+                    for i, file in enumerate(uploaded_files):
+                        label = f"Video {i+1} ({file.name})"
+                        file_info_list.append(label)
                         suffix = f".{file.name.split('.')[-1]}"
+                        
+                        # Reset file pointer sebelum dibaca
+                        file.seek(0)
                         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
                             tmp_file.write(file.read())
                             tmp_path = tmp_file.name
@@ -123,44 +137,41 @@ if uploaded_files:
                         gemini_files.append(g_file)
                         os.remove(tmp_path)
 
-                    daftar_file_str = ", ".join(file_names)
-                    total_file = len(file_names)
+                    daftar_file_str = ", ".join(file_info_list)
+                    total_file = len(file_info_list)
 
                     prompt = f"""
                     Kamu adalah Content Strategist & Copywriter profesional kuliner snack UMKM Indonesia.
-                    Pengguna telah mengunggah persis {total_file} file video dengan daftar nama file berikut:
+                    Pengguna telah mengunggah persis {total_file} file video dengan urutan:
                     {daftar_file_str}
 
                     Tugasmu adalah menganalisa SEMUA video tersebut dan menyusun panduan konten TikTok:
 
-                    1. **Panduan Potongan Video (CapCut Guide)**:
-                       - ATURAN MUTLAK: Kamu WAJIB mengambil minimal 1 potongan klip (durasi 2-3 detik) dari SETIAP file yang diunggah ({daftar_file_str}). TIDAK BOLEH ada file video yang dilewati atau diabaikan!
-                       - Urutkan videonya berdasarkan alur bercerita yang logis:
-                         * Video untuk Hook (misal adegan renyah / mematahkan sumpia).
-                         * Video untuk Isi (detail kemasan, butiran sumpia, atau tekstur isian udang).
-                         * Video untuk CTA (stok melimpah / kemasan siap kirim).
-                       - Tuliskan nama file asli yang jelas di setiap baris potongan klip beserta timestamp-nya.
-                       - Total durasi gabungan seluruh potongan klip harus berkisar 10 - 15 detik.
+                    1. **Panduan Potongan Video (CapCut Visual Guide)**:
+                       - Pengguna mengedit di iPhone (galeri tidak menampilkan nama file, hanya gambar awal video / thumbnail).
+                       - OLEH KARENA ITU, di setiap baris potongan, kamu WAJIB menuliskan:
+                         1. Label urutan video (contoh: Video 1, Video 2, dst).
+                         2. **Ciri Gambar Pertama / Thumbnail** (contoh: *Thumbnail: Tangan memegang toples*, atau *Thumbnail: Tumpukan karung coklat*).
+                         3. Timestamp detik potongannya [00:0X - 00:0Y].
+                         4. Keterangan visual saat dipotong.
+                       - WAJIB gunakan minimal 1 potongan dari SETIAP video yang diunggah.
+                       - Total durasi gabungan seluruh klip: 10 - 15 detik.
 
                     2. **Skrip Voice Over (ElevenLabs Ready)**:
-                       - Panjang naskah WAJIB antara 25 - 35 kata (disesuaikan dengan total durasi visual gabungan).
+                       - Panjang naskah WAJIB 25 - 35 kata (pas untuk 10-15 detik).
                        - Target: Ibu-ibu / penyuka camilan gurih renyah.
-                       - Alur kalimat:
-                         * [Hook]: 1 kalimat menarik perhatian di detik pertama.
-                         * [Isi]: 1-2 kalimat rasa gurih renyah udang sumpia Lesa Snack.
-                         * [CTA]: 1 kalimat ajakan beli di keranjang kuning.
-                       - Tulis teks polos tanpa embel-embel label agar langsung siap dibaca mesin ElevenLabs.
+                       - Alur: Hook -> Deskripsi rasa gurih renyah udang sumpia -> Ajakan checkout.
+                       - Tulis teks polos tanpa label [Hook]/[Isi].
 
                     3. **Caption TikTok & Hashtags**:
-                       - Hook, detail produk, ajakan transaksi keranjang kuning, serta 5-8 hashtag kuliner viral.
+                       - Hook, deskripsi produk, CTA keranjang kuning, dan 5-8 hashtag relevan.
 
                     Format Output:
                     ---
                     ### ✂️ 1. Panduan Potongan Video (CapCut)
-                    (Tuliskan daftar potongan untuk ke-{total_file} video yang diunggah secara urut)
-                    * Klip 1 (Hook) - [Nama_File_Asli]: [00:0X - 00:0Y] -> (Keterangan Visual)
-                    * Klip 2 (Isi) - [Nama_File_Asli]: [00:0X - 00:0Y] -> (Keterangan Visual)
-                    ...dst hingga semua file terpakai.
+                    * Klip 1 (Hook) - **[Video X]** (🖼️ *Ciri Awal/Thumbnail: ...*): `[00:0X - 00:0Y]` -> (Keterangan Visual)
+                    * Klip 2 (Isi) - **[Video Y]** (🖼️ *Ciri Awal/Thumbnail: ...*): `[00:0X - 00:0Y]` -> (Keterangan Visual)
+                    ...dst hingga semua video terpakai.
                     *(Total Durasi Gabungan: XX Detik)*
 
                     ---
@@ -173,14 +184,39 @@ if uploaded_files:
                     (Tulis caption lengkap di sini)
                     """
 
-                    response = client.models.generate_content(
-    model="gemini-3.7-flash",
-    contents=[*gemini_files, prompt],
-)
+                    # Auto Retry jika terjadi high demand / 503
+                    models_to_try = [
+                        "gemini-3.7-flash",
+                        "gemini-3.7-flash-lite",
+                        "gemini-flash-latest"
+                    ]
+                    response = None
+                    last_error = None
 
-                    st.success("✨ Konten Berhasil Dibuat!")
-                    with st.container(border=True):
-                        st.markdown(response.text)
+                    for model_name in models_to_try:
+                        for attempt in range(3):
+                            try:
+                                response = client.models.generate_content(
+                                    model=model_name,
+                                    contents=[*gemini_files, prompt]
+                                )
+                                break
+                            except Exception as err:
+                                last_error = err
+                                if "503" in str(err) or "UNAVAILABLE" in str(err):
+                                    time.sleep(3)
+                                    continue
+                                else:
+                                    break
+                        if response:
+                            break
+
+                    if response:
+                        st.success("✨ Konten Berhasil Dibuat!")
+                        with st.container(border=True):
+                            st.markdown(response.text)
+                    else:
+                        raise last_error
 
                 except Exception as e:
                     st.error(f"Terjadi kesalahan saat memproses konten: {e}")
