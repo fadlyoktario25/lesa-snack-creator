@@ -70,7 +70,7 @@ with col1:
         <div class="feature-card">
             <div class="icon-box">✂️</div>
             <div class="card-title">CapCut Cut Guide</div>
-            <div class="card-desc">Deteksi otomatis timestamp paling estetik & renyah dari klip untuk dipotong di CapCut.</div>
+            <div class="card-desc">Deteksi otomatis timestamp dari setiap video yang diunggah untuk dipotong di CapCut.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -110,8 +110,10 @@ if uploaded_files:
         if st.button("🚀 Process & Generate Content", use_container_width=True, type="primary"):
             with st.spinner("Sedang menganalisa visual video, membuat skrip, dan meracik caption..."):
                 gemini_files = []
+                file_names = []
                 try:
                     for file in uploaded_files:
+                        file_names.append(file.name)
                         suffix = f".{file.name.split('.')[-1]}"
                         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
                             tmp_file.write(file.read())
@@ -121,55 +123,60 @@ if uploaded_files:
                         gemini_files.append(g_file)
                         os.remove(tmp_path)
 
-                    prompt = """
-                    Kamu adalah Content Strategist & Copywriter profesional kuliner snack UMKM Indonesia.
-                    Tugasmu adalah menganalisa klip-klip video Sumpia Udang dari Lesa Snack dan membuat konsep video TikTok berdurasi ideal 10-15 detik.
+                    daftar_file_str = ", ".join(file_names)
+                    total_file = len(file_names)
 
-                    Hasilkan 3 komponen konten utama:
+                    prompt = f"""
+                    Kamu adalah Content Strategist & Copywriter profesional kuliner snack UMKM Indonesia.
+                    Pengguna telah mengunggah persis {total_file} file video dengan daftar nama file berikut:
+                    {daftar_file_str}
+
+                    Tugasmu adalah menganalisa SEMUA video tersebut dan menyusun panduan konten TikTok:
 
                     1. **Panduan Potongan Video (CapCut Guide)**:
-                       - WAJIB sebutkan file video mana yang diambil (contoh: Video 1, Video 2, atau nama file aslinya).
-                       - Susun potongan klip menjadi total durasi 10 - 15 detik (rata-rata 2-3 detik per adegan).
-                       - Klip 1: Hook visual (adegan mematahkan sumpia / visual renyah paling menarik).
-                       - Klip 2 & 3: Isi (detail isian udang, tekstur, atau tangan mengambil camilan).
-                       - Klip 4 / 5: Call to Action (kemasan rapi atau stok melimpah siap kirim).
-                       - Tuliskan timestamp dan total durasinya.
+                       - ATURAN MUTLAK: Kamu WAJIB mengambil minimal 1 potongan klip (durasi 2-3 detik) dari SETIAP file yang diunggah ({daftar_file_str}). TIDAK BOLEH ada file video yang dilewati atau diabaikan!
+                       - Urutkan videonya berdasarkan alur bercerita yang logis:
+                         * Video untuk Hook (misal adegan renyah / mematahkan sumpia).
+                         * Video untuk Isi (detail kemasan, butiran sumpia, atau tekstur isian udang).
+                         * Video untuk CTA (stok melimpah / kemasan siap kirim).
+                       - Tuliskan nama file asli yang jelas di setiap baris potongan klip beserta timestamp-nya.
+                       - Total durasi gabungan seluruh potongan klip harus berkisar 10 - 15 detik.
 
                     2. **Skrip Voice Over (ElevenLabs Ready)**:
-                       - Panjang skrip WAJIB antara 25 - 35 kata (pas untuk durasi bicara 10-15 detik).
+                       - Panjang naskah WAJIB antara 25 - 35 kata (disesuaikan dengan total durasi visual gabungan).
                        - Target: Ibu-ibu / penyuka camilan gurih renyah.
-                       - Struktur kalimat:
-                         * Hook pemancing rasa penasaran di awal.
-                         * Deskripsi gurih, krispi, dan nikmatnya udang sumpia Lesa Snack.
-                         * Ajakan pesan/checkout di keranjang kuning mumpung fresh & ready.
-                       - Format tulisan polos tanpa tanda kurung [Hook]/[Isi] agar langsung siap dibaca ElevenLabs.
+                       - Alur kalimat:
+                         * [Hook]: 1 kalimat menarik perhatian di detik pertama.
+                         * [Isi]: 1-2 kalimat rasa gurih renyah udang sumpia Lesa Snack.
+                         * [CTA]: 1 kalimat ajakan beli di keranjang kuning.
+                       - Tulis teks polos tanpa embel-embel label agar langsung siap dibaca mesin ElevenLabs.
 
                     3. **Caption TikTok & Hashtags**:
-                       - Hook baris pertama, detail singkat produk, CTA, dan 5-8 hashtag kuliner viral.
+                       - Hook, detail produk, ajakan transaksi keranjang kuning, serta 5-8 hashtag kuliner viral.
 
                     Format Output:
                     ---
                     ### ✂️ 1. Panduan Potongan Video (CapCut)
-                    * Klip 1 (Hook) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
-                    * Klip 2 (Isi) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
-                    * Klip 3 (Isi) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
-                    * Klip 4 (CTA) - [Nama File / Video X]: [00:0X - 00:0Y] -> (Keterangan Visual)
-                    *(Total Durasi: XX detik)*
+                    (Tuliskan daftar potongan untuk ke-{total_file} video yang diunggah secara urut)
+                    * Klip 1 (Hook) - [Nama_File_Asli]: [00:0X - 00:0Y] -> (Keterangan Visual)
+                    * Klip 2 (Isi) - [Nama_File_Asli]: [00:0X - 00:0Y] -> (Keterangan Visual)
+                    ...dst hingga semua file terpakai.
+                    *(Total Durasi Gabungan: XX Detik)*
 
                     ---
                     ### 🎙️ 2. Skrip Voice Over (ElevenLabs Ready)
-                    *(Estimasi: XX detik / XX kata)*
-                    (Tuliskan teks naskah langsung di sini)
+                    *(Estimasi: XX Detik / XX Kata)*
+                    (Tulis naskah VO di sini)
 
                     ---
                     ### 📱 3. Caption TikTok & Hashtags
-                    (Tuliskan caption lengkap di sini)
+                    (Tulis caption lengkap di sini)
                     """
 
                     response = client.models.generate_content(
-    model="gemini-3.7-flash",
-    contents=[*gemini_files, prompt],
-)
+                        model="gemini-2.0-flash",
+                        contents=[*gemini_files, prompt]
+                    )
 
                     st.success("✨ Konten Berhasil Dibuat!")
                     with st.container(border=True):
