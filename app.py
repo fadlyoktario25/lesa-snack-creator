@@ -3,8 +3,8 @@ import google.generativeai as genai
 import tempfile
 import os
 
-# Konfigurasi API Key Otomatis
-API_KEY = "AIzaSyC17rq62C_H_9tViAzWXvGbLu6wkcVzOyo"
+# Kode BARU yang aman:
+API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 
 # Konfigurasi Tampilan Halaman
