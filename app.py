@@ -174,9 +174,9 @@ if uploaded_files:
                     """
 
                     response = client.models.generate_content(
-                        model="gemini-2.0-flash",
-                        contents=[*gemini_files, prompt]
-                    )
+    model="gemini-flash-latest",
+    contents=[*gemini_files, prompt],
+)
 
                     st.success("✨ Konten Berhasil Dibuat!")
                     with st.container(border=True):
