@@ -1,11 +1,7 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 import tempfile
 import os
-
-# Kode BARU yang aman:
-API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=API_KEY)
 
 # Konfigurasi Tampilan Halaman
 st.set_page_config(
@@ -14,14 +10,17 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS Anti-Teks Putih (Memaksa semua elemen berwarna gelap yang jelas)
+# Ambil API Key dari Streamlit Secrets
+api_key = st.secrets.get("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
+
+# Custom CSS Dashboard Modern
 st.markdown("""
     <style>
     .stApp {
         background-color: #F8F9FA !important;
     }
     
-    /* Paksa semua teks, heading, list, dan paragraf menjadi gelap */
     .stApp p, .stApp span, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
         color: #1E293B !important;
     }
@@ -71,7 +70,7 @@ with col1:
         <div class="feature-card">
             <div class="icon-box">✂️</div>
             <div class="card-title">CapCut Cut Guide</div>
-            <div class="card-desc">Deteksi otomatis timestamp paling estetik & renyah dari 5 video untuk dipotong di CapCut.</div>
+            <div class="card-desc">Deteksi otomatis timestamp paling estetik & renyah dari klip untuk dipotong di CapCut.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -80,7 +79,7 @@ with col2:
         <div class="feature-card">
             <div class="icon-box">🎙️</div>
             <div class="card-title">Voice Over Script</div>
-            <div class="card-desc">Skrip naskah ramah khas ibu-ibu, natural & siap di-convert ke ElevenLabs.</div>
+            <div class="card-desc">Skrip 10-15 detik berstruktur Hook, Isi & CTA, siap dibaca ElevenLabs.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -96,7 +95,7 @@ with col3:
 st.write("")
 st.write("")
 
-# Area Upload Langsung Tampil
+# Area Upload Video
 st.markdown("### 📤 Upload Video Sumpia Udang")
 uploaded_files = st.file_uploader(
     "Pilih hingga 5 video (.mp4, .mov, .avi):", 
@@ -113,63 +112,65 @@ if uploaded_files:
                 gemini_files = []
                 try:
                     for file in uploaded_files:
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
+                        suffix = f".{file.name.split('.')[-1]}"
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
                             tmp_file.write(file.read())
                             tmp_path = tmp_file.name
                         
-                        g_file = genai.upload_file(tmp_path)
+                        g_file = client.files.upload(file=tmp_path)
                         gemini_files.append(g_file)
                         os.remove(tmp_path)
 
                     prompt = """
-                Kamu adalah Content Strategist & Copywriter profesional kuliner snack UMKM Indonesia.
-                Tugasmu adalah menganalisa klip-klip video Sumpia Udang dari Lesa Snack dan membuat konsep video TikTok berdurasi ideal 10-15 detik.
+                    Kamu adalah Content Strategist & Copywriter profesional kuliner snack UMKM Indonesia.
+                    Tugasmu adalah menganalisa klip-klip video Sumpia Udang dari Lesa Snack dan membuat konsep video TikTok berdurasi ideal 10-15 detik.
 
-                Hasilkan 3 komponen konten utama:
+                    Hasilkan 3 komponen konten utama:
 
-                1. **Panduan Potongan Video (CapCut Guide)**:
-                   - Susun potongan klip menjadi total durasi 10 - 15 detik (rata-rata 2-3 detik per potongan adegan).
-                   - Klip 1: Hook visual (adegan mematahkan sumpia / visual renyah paling menarik).
-                   - Klip 2 & 3: Isi (detail isian udang, tekstur, atau tangan mengambil camilan).
-                   - Klip 4 / 5: Call to Action (kemasan rapi atau stok melimpah siap kirim).
-                   - Tuliskan timestamp dan total durasinya.
+                    1. **Panduan Potongan Video (CapCut Guide)**:
+                       - Susun potongan klip menjadi total durasi 10 - 15 detik (rata-rata 2-3 detik per adegan).
+                       - Klip 1: Hook visual (adegan mematahkan sumpia / visual renyah paling menarik).
+                       - Klip 2 & 3: Isi (detail isian udang, tekstur, atau tangan mengambil camilan).
+                       - Klip 4 / 5: Call to Action (kemasan rapi atau stok melimpah siap kirim).
+                       - Tuliskan timestamp dan total durasinya.
 
-                2. **Skrip Voice Over (ElevenLabs Ready)**:
-                   - Panjang skrip WAJIB antara 25 - 35 kata (pas untuk durasi bicara 10-15 detik).
-                   - Target: Ibu-ibu / penyuka camilan gurih renyah.
-                   - Struktur kalimat wajib:
-                     * [Hook]: 1 kalimat pemancing rasa penasaran di awal.
-                     * [Isi]: 1-2 kalimat deskripsi gurih, krispi, dan nikmatnya udang sumpia Lesa Snack.
-                     * [CTA]: 1 kalimat ajakan pesan/checkout di keranjang kuning mumpung ready.
-                   - Format tulisan polos tanpa tanda kurung [Hook]/[Isi] agar langsung siap dibaca ElevenLabs.
+                    2. **Skrip Voice Over (ElevenLabs Ready)**:
+                       - Panjang skrip WAJIB antara 25 - 35 kata (pas untuk durasi bicara 10-15 detik).
+                       - Target: Ibu-ibu / penyuka camilan gurih renyah.
+                       - Struktur kalimat:
+                         * Hook pemancing rasa penasaran di awal.
+                         * Deskripsi gurih, krispi, dan nikmatnya udang sumpia Lesa Snack.
+                         * Ajakan pesan/checkout di keranjang kuning mumpung fresh & ready.
+                       - Format tulisan polos tanpa tanda kurung [Hook]/[Isi] agar langsung siap dibaca ElevenLabs.
 
-                3. **Caption TikTok & Hashtags**:
-                   - Hook baris pertama, detail singkat produk, CTA, dan 5-8 hashtag kuliner viral.
+                    3. **Caption TikTok & Hashtags**:
+                       - Hook baris pertama, detail singkat produk, CTA, dan 5-8 hashtag kuliner viral.
 
-                Format Output:
-                ---
-                ### ✂️ 1. Panduan Potongan Video (CapCut)
-                * Klip 1 (Hook): [00:0X - 00:0Y] -> ...
-                * Klip 2 (Isi): [00:0X - 00:0Y] -> ...
-                * Klip 3 (Isi): [00:0X - 00:0Y] -> ...
-                * Klip 4 (CTA): [00:0X - 00:0Y] -> ...
-                *(Total Durasi: XX detik)*
+                    Format Output:
+                    ---
+                    ### ✂️ 1. Panduan Potongan Video (CapCut)
+                    * Klip 1 (Hook): [00:0X - 00:0Y] -> ...
+                    * Klip 2 (Isi): [00:0X - 00:0Y] -> ...
+                    * Klip 3 (Isi): [00:0X - 00:0Y] -> ...
+                    * Klip 4 (CTA): [00:0X - 00:0Y] -> ...
+                    *(Total Durasi: XX detik)*
 
-                ---
-                ### 🎙️ 2. Skrip Voice Over (ElevenLabs Ready)
-                *(Estimasi: XX detik / XX kata)*
-                (Tuliskan teks naskah langsung di sini)
+                    ---
+                    ### 🎙️ 2. Skrip Voice Over (ElevenLabs Ready)
+                    *(Estimasi: XX detik / XX kata)*
+                    (Tuliskan teks naskah langsung di sini)
 
-                ---
-                ### 📱 3. Caption TikTok & Hashtags
-                (Tuliskan caption lengkap di sini)
-                """
-                    model = genai.GenerativeModel('models/gemini-3.7-flash')
-                    response = model.generate_content([*gemini_files, prompt])
+                    ---
+                    ### 📱 3. Caption TikTok & Hashtags
+                    (Tuliskan caption lengkap di sini)
+                    """
+
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=[*gemini_files, prompt]
+                    )
 
                     st.success("✨ Konten Berhasil Dibuat!")
-                    
-                    # Box Container Bawaan Streamlit (Aman dari Bug CSS)
                     with st.container(border=True):
                         st.markdown(response.text)
 
@@ -179,6 +180,6 @@ if uploaded_files:
                 finally:
                     for gf in gemini_files:
                         try:
-                            genai.delete_file(gf.name)
+                            client.files.delete(name=gf.name)
                         except Exception:
                             pass
