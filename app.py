@@ -11,21 +11,19 @@ st.set_page_config(
     layout="wide"
 )
 
-# Ambil API Key dari Streamlit Secrets
-api_key = st.secrets.get("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
+# Inisialisasi Klien Gemini
+gemini_key = st.secrets.get("GEMINI_API_KEY")
+client = genai.Client(api_key=gemini_key)
 
-# Custom CSS Dashboard Modern & Bersih
+# Custom CSS Dashboard Modern
 st.markdown("""
     <style>
     .stApp {
         background-color: #F8F9FA !important;
     }
-    
     .stApp p, .stApp span, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
         color: #1E293B !important;
     }
-
     .main-header {
         text-align: center;
         padding: 15px 0 10px 0;
@@ -60,7 +58,7 @@ st.markdown("""
 st.markdown("""
     <div class="main-header">
         <div class="main-title">🎬 AI Video Content Director</div>
-        <div class="main-subtitle">Asisten Kurasi Visual CapCut, Voice Over & Caption Otomatis untuk Semua Produk</div>
+        <div class="main-subtitle">Panduan CapCut, Naskah Natural ElevenLabs & Caption TikTok Otomatis</div>
     </div>
 """, unsafe_allow_html=True)
 
@@ -71,7 +69,7 @@ with col1:
         <div class="feature-card">
             <div class="icon-box">✂️</div>
             <div class="card-title">CapCut Cut Guide (X.Xs)</div>
-            <div class="card-desc">Deteksi detik terbaik dengan format durasi desimal CapCut & deskripsi visual video.</div>
+            <div class="card-desc">Deteksi detik terbaik tiap video mentah sesuai format desimal CapCut.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -80,7 +78,7 @@ with col2:
         <div class="feature-card">
             <div class="icon-box">🎙️</div>
             <div class="card-title">Voice Over Script</div>
-            <div class="card-desc">Skrip durasi fleksibel berstruktur Hook, Isi & CTA, siap dibaca ElevenLabs / TTS.</div>
+            <div class="card-desc">Naskah otomatis atau tempel dari ChatGPT, siap 1-klik copy ke ElevenLabs.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -88,45 +86,57 @@ with col3:
     st.markdown("""
         <div class="feature-card">
             <div class="icon-box">📱</div>
-            <div class="card-title">TikTok / Reels Copy</div>
-            <div class="card-desc">Caption menggugah rasa penasaran, CTA keranjang kuning, dan hashtag terarah.</div>
+            <div class="card-title">TikTok Post Kit</div>
+            <div class="card-desc">Caption menggugah rasa penasaran, CTA keranjang kuning & tagar #lesasnack.</div>
         </div>
     """, unsafe_allow_html=True)
 
 st.write("")
 
-# Form Informasi Produk (Universal)
+# Form Informasi Produk
 with st.container(border=True):
-    st.markdown("##### 📌 Informasi Produk & Target Konten")
+    st.markdown("##### 📌 1. Informasi Produk & Target Konten")
     c_nama, c_usp = st.columns(2)
     with c_nama:
-        nama_produk = st.text_input("Nama & Kategori Produk:", placeholder="Contoh: Sumpia Udang / Kemeja Linen Pria / Serum Wajah")
+        nama_produk = st.text_input("Nama & Kategori Produk:", placeholder="Contoh: Sumpia Udang / Kemeja Linen / Keripik Pedas")
     with c_usp:
-        usp_produk = st.text_input("Keunggulan Utama (USP):", placeholder="Contoh: Super renyah isian gurih / Bahan adem anti kusut / Mencerahkan 7 hari")
+        usp_produk = st.text_input("Keunggulan Utama (USP):", placeholder="Contoh: Super renyah isian gurih padat, bumbu medok")
 
     c_audiens, c_tone, c_durasi = st.columns(3)
     with c_audiens:
         target_audiens = st.selectbox(
             "Target Audiens:",
-            ["Penyuka Camilan / Ibu Rumah Tangga", "Gen-Z / Remaja", "Karyawan & Profesional", "Umum / Semua Kalangan"]
+            ["Penyuka Camilan / Ibu Rumah Tangga", "Gen-Z / Anak Muda", "Karyawan & Profesional", "Umum / Semua Kalangan"]
         )
     with c_tone:
         tone_suara = st.selectbox(
-            "Gaya Bahasa / Tone:",
-            ["Santai & Menggoda Selera (Camilan/Kuliner)", "Enerjik & Persuasif (Hard Selling / Promo)", "Elegan & Storytelling (Lifestyle/Skincare)", "Informatif & Edukatif"]
+            "Gaya Bahasa:",
+            ["Santai & Bikin Ngiler (Kuliner Gaul)", "Storytelling Ringan & Akrab", "Enerjik Racun Belanja (Hard Selling)", "Elegan & Informatif"]
         )
     with c_durasi:
         target_durasi = st.selectbox(
             "Target Durasi Video:",
-            [
-                "20 - 30 Detik (Standar Review / Selling)",
-                "10 - 15 Detik (Cepat / Fast Hook)",
-                "45 - 60 Detik (Storytelling / Edukasi Mendalam)"
-            ]
+            ["10 - 15 Detik (Fast Hook)", "20 - 30 Detik (Standar Review)", "45 - 60 Detik (Storytelling Panjang)"]
+        )
+
+# Opsi Skrip
+with st.container(border=True):
+    st.markdown("##### ✍️ 2. Metode Naskah Voice Over")
+    mode_skrip = st.radio(
+        "Pilih cara pembuatan naskah:",
+        ["🤖 Buat Otomatis (Gaya Santai & Natural)", "📝 Tempel Naskah Manual (Hasil dari ChatGPT)"],
+        horizontal=True
+    )
+    manual_script = ""
+    if mode_skrip == "📝 Tempel Naskah Manual (Hasil dari ChatGPT)":
+        manual_script = st.text_area(
+            "Tempel naskah voice over dari ChatGPT di sini:",
+            placeholder="Contoh: Gak nyangka cemilan sekecil ini isian udangnya nendang banget...",
+            height=120
         )
 
 # Area Upload Video
-st.markdown("##### 📤 Upload Klip Video Mentah")
+st.markdown("##### 📤 3. Upload Klip Video Mentah")
 uploaded_files = st.file_uploader(
     "Pilih 2 hingga 5 video (.mp4, .mov, .avi):", 
     type=["mp4", "mov", "avi"], 
@@ -137,8 +147,7 @@ if uploaded_files:
     if len(uploaded_files) > 5:
         st.error("⚠️ Maksimal 5 video saja ya Uda!")
     else:
-        # Preview Video di Web
-        st.markdown("###### 🎬 Video yang Dipilih:")
+        st.markdown("###### 🎬 Video Terpilih:")
         cols = st.columns(len(uploaded_files))
         for i, file in enumerate(uploaded_files):
             with cols[i]:
@@ -148,9 +157,11 @@ if uploaded_files:
         st.write("")
         if st.button("🚀 Analisa Video & Buat Konten", use_container_width=True, type="primary"):
             if not nama_produk:
-                st.warning("Mohon isi Nama Produk terlebih dahulu agar AI bisa menyesuaikan naskah dan caption-nya ya!")
+                st.warning("Mohon isi Nama Produk terlebih dahulu ya Uda!")
+            elif mode_skrip == "📝 Tempel Naskah Manual (Hasil dari ChatGPT)" and not manual_script.strip():
+                st.warning("Mohon tempelkan naskah dari ChatGPT terlebih dahulu ya Uda!")
             else:
-                with st.spinner("Gemini sedang membedah frame video, menghitung durasi CapCut, dan meracik naskah..."):
+                with st.spinner("Gemini sedang membedah frame video, menyusun potongan CapCut, dan meracik naskah natural..."):
                     gemini_files = []
                     file_info_list = []
                     try:
@@ -171,71 +182,85 @@ if uploaded_files:
                         daftar_file_str = ", ".join(file_info_list)
                         total_file = len(file_info_list)
 
+                        durasi_kata = "25 - 35 kata" if "10 - 15" in target_durasi else ("50 - 70 kata" if "20 - 30" in target_durasi else "110 - 140 kata")
+
+                        # Instruksi Sesuai Pilihan Mode Naskah
+                        if mode_skrip == "📝 Tempel Naskah Manual (Hasil dari ChatGPT)":
+                            naskah_instruction = f"""
+                            PENGGUNA SUDAH MENYEDIAKAN NASKAH VOICE OVER SENDIRI DARI CHATGPT:
+                            \"\"\"{manual_script.strip()}\"\"\"
+
+                            TUGAS UTAMA:
+                            - Gunakan naskah di atas secara persis pada tag [VOICE_OVER].
+                            - Pecah naskah tersebut menjadi beberapa kalimat, lalu cari potongan adegan dari {total_file} video yang diunggah ({daftar_file_str}) yang paling pas secara visual untuk mengilustrasikan tiap kalimat naskah tersebut.
+                            """
+                        else:
+                            naskah_instruction = f"""
+                            BUATKAN NASKAH VOICE OVER BARU:
+                            - Panjang naskah: {durasi_kata}.
+                            - JANGAN PERNAH gunakan bahasa iklan kaku seperti: 'manjakan lidah Anda', 'kelezatan tiada tara', 'sensasi tak terlupakan', 'perpaduan sempurna'.
+                            - Gunakan gaya bahasa santai sehari-hari seperti kreator TikTok Indonesia yang mengulas produk secara jujur dan bikin ngiler penonton.
+                            - Tulis naskah polos tanpa tanda kurung [Hook]/[Isi] agar siap dibaca ElevenLabs.
+                            """
+
                         prompt = f"""
-                        Kamu adalah Video Director, Video Editor CapCut, dan Copywriter profesional.
+                        Kamu adalah Video Director CapCut dan Copywriter TikTok kuliner/UMKM nomor satu di Indonesia.
                         
                         Informasi Produk:
-                        - Nama & Kategori: {nama_produk}
-                        - Keunggulan Utama (USP): {usp_produk}
+                        - Produk: {nama_produk}
+                        - Keunggulan (USP): {usp_produk}
                         - Target Audiens: {target_audiens}
-                        - Gaya Bahasa: {tone_suara}
-                        - Target Total Durasi: {target_durasi}
+                        - Gaya Bicara: {tone_suara}
+                        - Target Durasi Video: {target_durasi}
                         
-                        Pengguna telah mengunggah {total_file} video mentah: {daftar_file_str}.
+                        Daftar file video mentah ({total_file} video): {daftar_file_str}.
+
+                        {naskah_instruction}
+
+                        TUGAS KAMU:
+                        1. **Naskah Voice Over (ElevenLabs Ready)**:
+                           - Sediakan naskah teks polos yang siap dibaca mesin ElevenLabs.
                         
-                        Tugasmu:
-                        1. **Panduan Potongan CapCut (CapCut Cut Guide)**:
-                           - WAJIB gunakan minimal 1 potongan terbaik dari SETIAP file video yang diunggah ({daftar_file_str}).
-                           - Sesuaikan total durasi video gabungan agar pas dengan target: {target_durasi}.
-                           - Untuk setiap video, berikan:
-                             * Label Video (contoh: Video 1, Video 2, dst).
-                             * **Ciri Visual Utama Video**: Deskripsikan objek/adegan utama video tersebut secara gamblang sebagai tanda pengenal saat memilih video di galeri HP.
-                             * **Rentang Waktu**: `[00:0X - 00:0Y]`
-                             * **Durasi CapCut**: Wajib dalam format desimal standar CapCut: **X.Xs** (contoh: `4.5s`, `5.2s`, `6.0s`).
-                             * **Deskripsi Aksi**: Alasan visual kenapa detik tersebut dipotong.
-                           - Alur potongan: Hook (detik paling memikat) -> Isi (detail/keunggulan produk) -> CTA (stok/kemasan siap kirim).
-                           - Hitung Total Durasi Gabungan dalam format desimal (contoh: `Total Durasi Gabungan: 24.5s`).
+                        2. **Panduan Potongan Video (CapCut Guide)**:
+                           - WAJIB gunakan minimal 1 potongan klip terbaik dari SETIAP video yang diunggah ({daftar_file_str}).
+                           - Cocokkan adegan visual dengan kalimat naskah yang sedang dibaca pada detik tersebut.
+                           - Tuliskan:
+                             * Nomor Klip & Video yang dipakai.
+                             * Ciri Visual Utama Video (sebagai pengenal saat memilih video di galeri HP).
+                             * Detik potongan `[00:0X - 00:0Y]`.
+                             * Durasi potong dalam format desimal standar CapCut: **X.Xs** (contoh: 2.8s, 3.5s).
+                             * Naskah yang dibaca & Aksi visual.
+                           - Hitung Total Durasi Gabungan.
 
-                        2. **Skrip Voice Over (ElevenLabs / TTS Ready)**:
-                           - Sesuaikan jumlah kata naskah dengan target durasi:
-                             * Jika durasi 10-15 detik: 25 - 35 kata.
-                             * Jika durasi 20-30 detik: 50 - 70 kata.
-                             * Jika durasi 45-60 detik: 110 - 140 kata.
-                           - Bahasa natural, menggugah minat sesuai target audiens.
-                           - Alur: Hook kuat -> Penjelasan keunggulan & detail produk -> Ajakan beli (CTA).
-                           - Tulis teks naskah polos tanpa tanda kurung [Hook]/[Isi] agar langsung siap di-copy ke software TTS.
+                        3. **Caption TikTok & Hashtags**:
+                           - Hook pemancing rasa penasaran, penjelasan singkat, ajakan checkout di keranjang kuning.
+                           - Maksimal 5 hashtag relevan dan WAJIB menyertakan tagar #lesasnack.
 
-                        3. **Caption TikTok / Reels & Hashtags**:
-                           - Hook baris pertama, benefit singkat produk, ajakan transaksi keranjang kuning / DM.
-                           - ATURAN HASHTAG: Jumlah hashtag MAKSIMAL 5 hashtag, dan WAJIB menyertakan tagar #lesasnack sebagai tagar utama (contoh: #lesasnack #sumpiaudang #camilanviral #snackgurih #kuliner).
+                        Format Balasan:
+                        [VOICE_OVER]
+                        (Tulis naskah VO polos di sini)
+                        [/VOICE_OVER]
 
-                        Format Output:
-                        ---
-                        ### ✂️ 1. Panduan Potongan Video (CapCut)
-                        * Klip 1 (Hook) - **[Video X]** (🔍 *Ciri Video: ...*): `[00:0X - 00:0Y]` $\\rightarrow$ **Durasi CapCut: X.Xs**
-                          *(Aksi Visual: ...)*
-                        * Klip 2 (Isi) - **[Video Y]** (🔍 *Ciri Video: ...*): `[00:0X - 00:0Y]` $\\rightarrow$ **Durasi CapCut: X.Xs**
-                          *(Aksi Visual: ...)*
-                        ...dst hingga ke-{total_file} video terpakai.
+                        [CAPCUT_GUIDE]
+                        ### ✂️ Panduan Potongan Video (CapCut B-Roll Matching)
+                        * **Klip 1** - **[Video X]** (🔍 *Ciri Video: ...*): `[00:0X - 00:0Y]` -> **Durasi CapCut: X.Xs**
+                          * 🗣️ *Naskah:* "..."
+                          * 🎯 *Aksi Visual:* ...
+                        * **Klip 2** - **[Video Y]** (🔍 *Ciri Video: ...*): `[00:0X - 00:0Y]` -> **Durasi CapCut: X.Xs**
+                          * 🗣️ *Naskah:* "..."
+                          * 🎯 *Aksi Visual:* ...
+                        ...dst hingga semua video terpakai.
                         *(Total Durasi Video Jadi: XX.Xs)*
+                        [/CAPCUT_GUIDE]
 
-                        ---
-                        ### 🎙️ 2. Skrip Voice Over (ElevenLabs Ready)
-                        *(Estimasi: XX Detik / XX Kata)*
-                        (Tulis naskah teks polos di sini)
-
-                        ---
-                        ### 📱 3. Caption Postingan & Hashtags
+                        [CAPTION]
                         (Tulis caption lengkap dengan maksimal 5 hashtag termasuk #lesasnack)
+                        [/CAPTION]
                         """
 
-                        models_to_try = [
-                            "gemini-3.7-flash",
-                            "gemini-3.7-flash-lite",
-                            "gemini-flash-latest"
-                        ]
+                        models_to_try = ["gemini-3.7-flash", "gemini-3.7-flash-lite", "gemini-flash-latest"]
                         response = None
-                        last_error = None
+                        last_err = None
 
                         for model_name in models_to_try:
                             for attempt in range(3):
@@ -246,7 +271,7 @@ if uploaded_files:
                                     )
                                     break
                                 except Exception as err:
-                                    last_error = err
+                                    last_err = err
                                     if "503" in str(err) or "UNAVAILABLE" in str(err):
                                         time.sleep(3)
                                         continue
@@ -255,15 +280,46 @@ if uploaded_files:
                             if response:
                                 break
 
-                        if response:
-                            st.success("✨ Konten Berhasil Dianalisa & Dibuat!")
-                            with st.container(border=True):
-                                st.markdown(response.text)
-                        else:
-                            raise last_error
+                        if not response:
+                            raise last_err
+
+                        raw_output = response.text
+
+                        # Parsing output
+                        vo_text = ""
+                        capcut_text = ""
+                        caption_text = ""
+
+                        if "[VOICE_OVER]" in raw_output and "[/VOICE_OVER]" in raw_output:
+                            vo_text = raw_output.split("[VOICE_OVER]")[1].split("[/VOICE_OVER]")[0].strip()
+                        if "[CAPCUT_GUIDE]" in raw_output and "[/CAPCUT_GUIDE]" in raw_output:
+                            capcut_text = raw_output.split("[CAPCUT_GUIDE]")[1].split("[/CAPCUT_GUIDE]")[0].strip()
+                        if "[CAPTION]" in raw_output and "[/CAPTION]" in raw_output:
+                            caption_text = raw_output.split("[CAPTION]")[1].split("[/CAPTION]")[0].strip()
+
+                        if not vo_text and not capcut_text:
+                            capcut_text = raw_output
+
+                        st.success("✨ Konten Berhasil Dianalisa & Disinkronkan!")
+
+                        # 1. Box Skrip ElevenLabs (Tinggal 1-Klik Copy)
+                        if vo_text:
+                            st.markdown("### 🎙️ 1. Skrip Voice Over (Siap Copy ke ElevenLabs)")
+                            st.code(vo_text, language="text")
+
+                        # 2. Panduan Potong CapCut
+                        if capcut_text:
+                            st.markdown("---")
+                            st.markdown(capcut_text)
+
+                        # 3. Caption TikTok & Hashtags
+                        if caption_text:
+                            st.markdown("---")
+                            st.markdown("### 📱 3. Caption TikTok & Hashtags (Siap Copy)")
+                            st.code(caption_text, language="text")
 
                     except Exception as e:
-                        st.error(f"Terjadi kesalahan saat memproses konten: {e}")
+                        st.error(f"Terjadi kesalahan saat memproses visual: {e}")
 
                     finally:
                         for gf in gemini_files:
