@@ -80,7 +80,7 @@ with col2:
         <div class="feature-card">
             <div class="icon-box">🎙️</div>
             <div class="card-title">Voice Over Script</div>
-            <div class="card-desc">Skrip 10-15 detik berstruktur Hook, Isi & CTA, siap dibaca ElevenLabs / TTS.</div>
+            <div class="card-desc">Skrip durasi fleksibel berstruktur Hook, Isi & CTA, siap dibaca ElevenLabs / TTS.</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -97,14 +97,14 @@ st.write("")
 
 # Form Informasi Produk (Universal)
 with st.container(border=True):
-    st.markdown("##### 📌 Informasi Produk & Konten")
+    st.markdown("##### 📌 Informasi Produk & Target Konten")
     c_nama, c_usp = st.columns(2)
     with c_nama:
         nama_produk = st.text_input("Nama & Kategori Produk:", placeholder="Contoh: Sumpia Udang / Kemeja Linen Pria / Serum Wajah")
     with c_usp:
         usp_produk = st.text_input("Keunggulan Utama (USP):", placeholder="Contoh: Super renyah isian gurih / Bahan adem anti kusut / Mencerahkan 7 hari")
 
-    c_audiens, c_tone = st.columns(2)
+    c_audiens, c_tone, c_durasi = st.columns(3)
     with c_audiens:
         target_audiens = st.selectbox(
             "Target Audiens:",
@@ -114,6 +114,15 @@ with st.container(border=True):
         tone_suara = st.selectbox(
             "Gaya Bahasa / Tone:",
             ["Santai & Menggoda Selera (Camilan/Kuliner)", "Enerjik & Persuasif (Hard Selling / Promo)", "Elegan & Storytelling (Lifestyle/Skincare)", "Informatif & Edukatif"]
+        )
+    with c_durasi:
+        target_durasi = st.selectbox(
+            "Target Durasi Video:",
+            [
+                "20 - 30 Detik (Standar Review / Selling)",
+                "10 - 15 Detik (Cepat / Fast Hook)",
+                "45 - 60 Detik (Storytelling / Edukasi Mendalam)"
+            ]
         )
 
 # Area Upload Video
@@ -170,25 +179,30 @@ if uploaded_files:
                         - Keunggulan Utama (USP): {usp_produk}
                         - Target Audiens: {target_audiens}
                         - Gaya Bahasa: {tone_suara}
+                        - Target Total Durasi: {target_durasi}
                         
                         Pengguna telah mengunggah {total_file} video mentah: {daftar_file_str}.
                         
                         Tugasmu:
                         1. **Panduan Potongan CapCut (CapCut Cut Guide)**:
-                           - WAJIB gunakan minimal 1 potongan terbaik dari SETIAP file video yang diunggah.
+                           - WAJIB gunakan minimal 1 potongan terbaik dari SETIAP file video yang diunggah ({daftar_file_str}).
+                           - Sesuaikan total durasi video gabungan agar pas dengan target: {target_durasi}.
                            - Untuk setiap video, berikan:
-                             * Label Video (contoh: Video 1, Video 2).
-                             * **Ciri Visual Utama Video**: Deskripsikan objek/adegan utama video tersebut secara gamblang (contoh: *Visual Utama: Tangan memegang kemasan toples di atas meja putih*, atau *Visual Utama: Tumpukan karung stok di lantai*) sebagai tanda pengenal saat memilih video di galeri HP.
+                             * Label Video (contoh: Video 1, Video 2, dst).
+                             * **Ciri Visual Utama Video**: Deskripsikan objek/adegan utama video tersebut secara gamblang sebagai tanda pengenal saat memilih video di galeri HP.
                              * **Rentang Waktu**: `[00:0X - 00:0Y]`
-                             * **Durasi CapCut**: Wajib dalam format desimal standar CapCut: **X.Xs** (contoh: `2.4s`, `3.1s`, `4.0s`).
+                             * **Durasi CapCut**: Wajib dalam format desimal standar CapCut: **X.Xs** (contoh: `4.5s`, `5.2s`, `6.0s`).
                              * **Deskripsi Aksi**: Alasan visual kenapa detik tersebut dipotong.
                            - Alur potongan: Hook (detik paling memikat) -> Isi (detail/keunggulan produk) -> CTA (stok/kemasan siap kirim).
-                           - Hitung Total Durasi Gabungan dalam format desimal (contoh: `Total Durasi Gabungan: 12.5s`).
+                           - Hitung Total Durasi Gabungan dalam format desimal (contoh: `Total Durasi Gabungan: 24.5s`).
 
                         2. **Skrip Voice Over (ElevenLabs / TTS Ready)**:
-                           - Panjang skrip WAJIB antara 25 - 35 kata (pas untuk durasi 10 - 15 detik).
+                           - Sesuaikan jumlah kata naskah dengan target durasi:
+                             * Jika durasi 10-15 detik: 25 - 35 kata.
+                             * Jika durasi 20-30 detik: 50 - 70 kata.
+                             * Jika durasi 45-60 detik: 110 - 140 kata.
                            - Bahasa natural, menggugah minat sesuai target audiens.
-                           - Alur: Hook -> Penjelasan keunggulan produk -> Ajakan beli (CTA).
+                           - Alur: Hook kuat -> Penjelasan keunggulan & detail produk -> Ajakan beli (CTA).
                            - Tulis teks naskah polos tanpa tanda kurung [Hook]/[Isi] agar langsung siap di-copy ke software TTS.
 
                         3. **Caption TikTok / Reels & Hashtags**:
